@@ -20,4 +20,4 @@
     (is (= false @param/names) "invalid number thrown before init names"))
   (testing "init help"
     (is (= (with-out-str (param/init ["----h"]))
-           "(- -help -h -test -t -flat -f -real -r -unreal -u)\n") "multi hyphen to escape from lein")))
+           "(- -help -h -test -t -flat -f -real -r)\n") "multi hyphen to escape from lein")))

@@ -6,8 +6,7 @@
                 (def help (atom nil)) ["help" "h"]
                 (def testing (atom true)) ["test" "t"]
                 (def flat (atom nil)) ["flat" "f"]
-                (def real (atom nil)) ["real" "r"]
-                (def unreal (atom nil)) ["unreal" "u"]})
+                (def real (atom nil)) ["real" "r"]})
 (def help-info (flatten (map (partial map (partial str "-")) (vals parameter))))
 (def image-suffix (apply into (map var-get [(def real-suffix ["bmp" "png"]) (def unreal-suffix ["jpg" "jpeg"])])))
 (def output-folder (java.io.File. (str "out_" (Long/toString (System/currentTimeMillis) 36))))
