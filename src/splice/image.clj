@@ -4,8 +4,11 @@
            (javax.imageio ImageIO))
   (:require [splice.param :as param])
   (:gen-class))
-(defn suture [images suffix ^File folder]
-  ())
+(defn suture [images ^File folder suffix]
+  (if (not (empty? images))
+    (let [border-proximal (inc (long (Math/sqrt (apply + (map #(* (.getWidth (second %)) (.getHeight (second %)))
+                                                              images)))))]
+      (println border-proximal))))
 (defn sunder [file-tree]
   (let [{folders true, files false} (group-by (comp map? val) file-tree)
         {real true, lossy false}
@@ -18,4 +21,4 @@
       [false true] (suture files (ffirst file-tree) (first param/lossy-suffix))
       [true true] (do (suture files (ffirst file-tree) (first param/real-suffix))
                       (suture files (ffirst file-tree) (first param/lossy-suffix))))
-    (if (empty? folders) nil (recur (val (first folders))))))
+    (doseq [folder folders] (sunder (val folder)))))
