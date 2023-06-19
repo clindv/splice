@@ -2,8 +2,7 @@
   (:import (java.io File
                     FileFilter)
            (javax.imageio ImageIO))
-  (:require [splice.param :as param]
-            [splice.image :as image])
+  (:require [splice.param :as param])
   (:gen-class))
 (defn- list-files [^File file]
   (.listFiles file (reify FileFilter
@@ -29,16 +28,3 @@
   (if @param/flat
     (reduce (partial conj {}) (filter #(and (map-entry? %) ((comp not map? val) %)) (tree-seq coll? identity m)))
     m))
-(defn sunder [m]
-  (let [{folders true, files false} (group-by (comp map? val) m)
-        {real true, lossy false}
-        (group-by #(not-every? false? (map (fn [suffix] (.endsWith (.getName (key %)) suffix))
-                                           param/real-suffix)) files)]
-    (case [(boolean @param/real) (boolean @param/lossy)]
-      [false false] (do (image/suture (ffirst m) real (first param/real-suffix))
-                        (image/suture (ffirst m) lossy (first param/lossy-suffix)))
-      [true false] (image/suture (ffirst m) files (first param/real-suffix))
-      [false true] (image/suture (ffirst m) files (first param/lossy-suffix))
-      [true true] (do (image/suture (ffirst m) files (first param/real-suffix))
-                      (image/suture (ffirst m) files (first param/lossy-suffix))))
-    (if (empty? folders) nil (recur (val (first folders))))))
