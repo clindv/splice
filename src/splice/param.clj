@@ -6,9 +6,10 @@
                 (def help (atom nil)) ["help" "h"]
                 (def testing (atom true)) ["test" "t"]
                 (def flat (atom nil)) ["flat" "f"]
-                (def real (atom nil)) ["real" "r"]})
+                (def real (atom nil)) ["real" "r"]
+                (def lossy (atom nil)) ["lossy" "l"]})
 (def help-info (flatten (map (partial map (partial str "-")) (vals parameter))))
-(def image-suffix (apply into (map var-get [(def real-suffix ["bmp" "png"]) (def unreal-suffix ["jpg" "jpeg"])])))
+(def image-suffix (apply into (map var-get [(def real-suffix ["png" "bmp"]) (def lossy-suffix ["jpg" "jpeg"])])))
 (def output-folder (java.io.File. (str "out_" (Long/toString (System/currentTimeMillis) 36))))
 (defn init [args]
   (doseq [vars (keys parameter)] (reset! (var-get vars) false))

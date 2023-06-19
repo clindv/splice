@@ -4,4 +4,4 @@
   (:gen-class))
 (defn -main
   [& args]
-  (-> args param/init file/validate file/tree-flatten))
+  (-> args param/init file/validate file/tree-flatten file/sunder))
