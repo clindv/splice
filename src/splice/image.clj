@@ -4,11 +4,49 @@
            (javax.imageio ImageIO))
   (:require [splice.param :as param])
   (:gen-class))
-(defn suture [images ^File folder suffix]
-  (if (not (empty? images))
-    (let [border-proximal (inc (long (Math/sqrt (apply + (map #(* (.getWidth (second %)) (.getHeight (second %)))
-                                                              images)))))]
-      (println border-proximal))))
+(defn dice [{cuts :cuts cutted :cutted plats :plats transpose-flag :transpose-flag}]
+  (if (empty? cuts)
+    cutted
+    (let [[width height] [(.getWidth (:buff (first cuts))) (.getHeight (:buff (first cuts)))]
+          not-fit (take-while #(or (> width (- (:border-x %) (:offset-x %)))
+                                   (> height (- (:border-y %) (:offset-y %)))) plats)
+          behind-cut (nthrest plats (inc (count not-fit)))
+          {offset-x :offset-x offset-y :offset-y border-x :border-x border-y :border-y} (nth plats (count not-fit))
+          new-plats (list
+                     (if transpose-flag
+                       {:offset-x offset-x :offset-y (+ offset-y height)
+                        :border-x (+ offset-x width) :border-y border-y}
+                       {:offset-x (+ offset-x width) :offset-y offset-y
+                        :border-x border-x :border-y (+ offset-y height)})
+                     (if transpose-flag
+                       {:offset-x (+ offset-x width) :offset-y offset-y
+                        :border-x border-x :border-y border-y}
+                       {:offset-x offset-x :offset-y (+ offset-y height)
+                        :border-x border-x :border-y border-y}))]
+      (recur {:cuts (rest cuts)
+              :cutted (conj cutted (into (first cuts) {:offset-x offset-x
+                                                       :offset-y offset-y
+                                                       :border-x (+ offset-x width)
+                                                       :border-y (+ offset-y height)}))
+              :plats (concat not-fit new-plats behind-cut)
+              :transpose-flag transpose-flag}))))
+(defn outline [images-file-buff]
+  (let [images (map (comp (partial apply hash-map) (partial interleave [:file :buff])) images-file-buff)
+        size-sqrt (inc (long (Math/sqrt (apply + (map #(* (.getWidth (:buff %)) (.getHeight (:buff %))) images)))))
+        width-max (apply max (map #(.getWidth (:buff %)) images))
+        height-max (apply max (map #(.getHeight (:buff %)) images))
+        transpose-flag (not (< height-max size-sqrt))
+        border-proximal (if transpose-flag (max height-max size-sqrt) (max width-max size-sqrt))]
+    {:cuts (sort-by (if transpose-flag #(.getWidth (:buff %)) #(.getHeight (:buff %))) > images)
+     :cutted []
+     :plats [{:offset-x 0
+              :offset-y 0
+              :border-x (if transpose-flag (apply + (map #(.getWidth (:buff %)) images)) border-proximal)
+              :border-y (if transpose-flag border-proximal (apply + (map #(.getHeight (:buff %)) images)))}]
+     :transpose-flag transpose-flag}))
+(defn suture [images-file-buff ^File folder suffix]
+  (if (not (empty? images-file-buff))
+    (clojure.pprint/pprint (-> images-file-buff outline dice))))
 (defn sunder [file-tree]
   (let [{folders true, files false} (group-by (comp map? val) file-tree)
         {real true, lossy false}
