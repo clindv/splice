@@ -16,5 +16,5 @@
     (is (thrown? AssertionError (file/validate (list "." (str "file-not-exists-" (rand-int 1e8))))) "partially"))
   (testing "file tree flatten"
     (reset! param/flat true)
-    (is (= (file/tree-flatten {:a {:b 1 :c 2 :a 3} :c 4}) {:a 3 :b 1 :c 4}))
+    (is (= (file/tree-flatten {:a {:b 1 :c 2 :a 3} :c 4}) {:a {:a 3 :b 1 :c 4}}))
     (reset! param/flat false)))

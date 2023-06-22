@@ -20,11 +20,9 @@
   (let [{files true, files-not-exists false} (group-by #(.exists %) (map #(File. %) file-names))]
     (if (pos? (count files-not-exists))
       (throw (AssertionError. (str "files: " (apply str (interpose " " files-not-exists)) " NOT exists.")))
-      {param/output-folder (apply conj (map tree (case (count files)
-                                                   0 (list-files (File. "."))
-                                                   1 (list-files (first files))
-                                                   files)))})))
+      {param/output-folder (apply conj (map tree (if (zero? (count files)) (list (File. ".")) files)))})))
 (defn tree-flatten [m]
   (if @param/flat
-    (reduce (partial conj {}) (filter #(and (map-entry? %) ((comp not map? val) %)) (tree-seq coll? identity m)))
+    {(ffirst m) (reduce (partial conj {}) (filter #(and (map-entry? %) ((comp not map? val) %))
+                                                  (tree-seq coll? identity m)))}
     m))
