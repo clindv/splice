@@ -13,7 +13,7 @@
                                                     (.endsWith file-name (str "." suffix))))))))))
 (defn- tree [^File file]
   (if (.isDirectory file)
-    {(File. (str (.getPath param/output-folder) "/" (.getPath file)))
+    {(File. (.getPath param/output-folder) (.getPath file))
      (reduce (partial conj {}) (for [f (list-files file)] (tree f)))}
     {file (ImageIO/read file)}))
 (defn validate [file-names]
